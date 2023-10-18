@@ -7,7 +7,7 @@ public class Main {
         tabela.inserir(new Aluno(123, "Emilly"));
         tabela.inserir(new Aluno(456, "Pietra"));
         tabela.inserir(new Aluno(789, "Beatriz"));
-        tabela.inserir(new Aluno(987, "Micael"));
+      
 
         tabela.imprimir(); 
 

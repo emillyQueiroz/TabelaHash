@@ -1,98 +1,120 @@
+import java.util.LinkedList;
+
 public class TabelaHash {
 
     private int tam_max_tabela;
-    private int qtd_itens; 
-    private Aluno[] estrutura; 
-    private double fatorDeCargaLimite = 0.7; // Fator de carga, aumenta a capacidade da tabela
+    private int qtd_itens;
+    private LinkedList<Aluno>[] estrutura; // Usando LinkedList para o encadeamento
+    private double fatorDeCargaLimite = 0.7; // para aumentar a carga da tabela 
 
-    
     public TabelaHash(int tam_vet) {
-        this.tam_max_tabela = tam_vet; 
-        this.qtd_itens = 0; 
-        this.estrutura = new Aluno[tam_vet]; 
+        this.tam_max_tabela = tam_vet;
+        this.qtd_itens = 0;
+        this.estrutura = new LinkedList[tam_vet]; // Inicializa uma lista encadeada
     }
 
-    
     public int obterTamanhoAtual() {
         return qtd_itens;
     }
 
-    // Verifica se a tabela está cheia com base no fator de carga
+    // Verifica se a tabela está cheia 
     public boolean estaCheio() {
+
         // Calcula o fator de carga
         double fatorCarga = (double) qtd_itens / tam_max_tabela;
-        
+
         // Verifica se o fator de carga ultrapassou o limite
         return fatorCarga >= fatorDeCargaLimite;
     }
 
-    // Remove um elemento da tabela com base na matrícula do aluno
+    // Remove um aluno da tabela
     public void remover(int matricula) {
-        int local = FuncaoHash(matricula);
+    // Calcula o índice usando a função de hash
+    int local = FuncaoHash(matricula);
 
-        for (int i = 0; i < tam_max_tabela; i++) {
-            if (estrutura[local] != null && estrutura[local].obterMatricula() == matricula) {
-                System.out.println("Aluno foi removido");
-                estrutura[local] = null;
+    // Verifica se há alguma lista de alunos no índice calculado
+    if (estrutura[local] != null) {
+        // Itera sobre a lista de alunos no índice
+        for (Aluno aluno : estrutura[local]) {
+            // Verifica se o aluno possui a matrícula desejada
+            if (aluno.obterMatricula() == matricula) {
+                // Remove o aluno da lista
+                estrutura[local].remove(aluno);
+                // Decrementa a quantidade de itens na tabela
                 qtd_itens--;
-                return;
+                // Imprime uma mensagem indicando que o aluno foi removido
+                System.out.println("Aluno foi removido");
+                return; // Retorna imediatamente após a remoção
             }
-            local = (local + 1) % tam_max_tabela;
         }
-
-        System.out.println("Aluno não encontrado!");
     }
+    
 
-    // Insere um aluno na tabela
+    System.out.println("Aluno não encontrado!");
+}
+
+    // Insere um aluno na tabela (usando sondagem linear)
     public void inserir(Aluno aluno) {
-      
-        if (estaCheio()) {
-            aumentarCapacidade(); // Aumenta a capacidade da tabela se estiver cheia
-        }
-
-        int local = FuncaoHash(aluno.obterMatricula());
-
-        while (estrutura[local] != null) {
-            local = (local + 1) % tam_max_tabela;
-        }
-
-        estrutura[local] = aluno;
-        qtd_itens++;
+    // Verifica se a tabela está cheia
+    if (estaCheio()) {
+        aumentarCapacidade(); // Aumenta a capacidade da tabela se estiver cheia
     }
 
-    // Busca um aluno da matricula pedida
+    int local = FuncaoHash(aluno.obterMatricula());
+
+    // Cria uma lista, se não existir ainda 
+    if (estrutura[local] == null) {
+        estrutura[local] = new LinkedList<>();
+    }
+
+    // Adiciona o aluno à lista associada a esse índice
+    estrutura[local].add(aluno);
+    // Incrementa a contagem de itens na tabela
+    qtd_itens++;
+}
+
+    // Busca um aluno pela matrícula (por encadeamento)
     public Aluno buscar(int matricula) {
-        int local = FuncaoHash(matricula);
+    // Calcula o índice usando a função de hash
+    int local = FuncaoHash(matricula);
 
-        for (int i = 0; i < tam_max_tabela; i++) {
-            if (estrutura[local] != null && estrutura[local].obterMatricula() == matricula) {
-                return estrutura[local];
+    // Verifica se há alguma lista de alunos no índice calculado
+    if (estrutura[local] != null) {
+        
+        for (Aluno aluno : estrutura[local]) {
+            // Verifica se o aluno possui a matrícula pedida
+            if (aluno.obterMatricula() == matricula) {
+                // Retorna o aluno encontrado
+                return aluno;
             }
-            local = (local + 1) % tam_max_tabela;
         }
-
-        return null; // Retorna null se o aluno não for encontrado
     }
+    
+   
+    return null;
+}
 
-    // Função de hash, verifia posição com base na matrícula
+    // Função de hash verifica a posição pela matrícula
     private int FuncaoHash(int matricula) {
         return matricula % tam_max_tabela;
     }
 
-    // Aumenta a capacidade da tabela e reorganiza os elementos
+    // Aumenta a capacidade da tabela
     private void aumentarCapacidade() {
         int novoTamanho = tam_max_tabela * 2;
-        Aluno[] novaEstrutura = new Aluno[novoTamanho];
+        LinkedList<Aluno>[] novaEstrutura = new LinkedList[novoTamanho];
 
-        for (Aluno aluno : estrutura) {
-            if (aluno != null) {
-                int local = FuncaoHash(aluno.obterMatricula());
+        for (LinkedList<Aluno> lista : estrutura) {
+            if (lista != null) {
+                for (Aluno aluno : lista) {
+                    int local = FuncaoHash(aluno.obterMatricula());
 
-                while (novaEstrutura[local] != null) {
-                    local = (local + 1) % novoTamanho;
+                    if (novaEstrutura[local] == null) {
+                        novaEstrutura[local] = new LinkedList<>();
+                    }
+
+                    novaEstrutura[local].add(aluno);
                 }
-
-                novaEstrutura[local] = aluno;
             }
         }
 
@@ -105,8 +127,10 @@ public class TabelaHash {
         System.out.println("TabelaHash:");
         for (int i = 0; i < tam_max_tabela; i++) {
             if (estrutura[i] != null) {
-                System.out.print(i + ": " + estrutura[i].obterMatricula() + " ");
-                System.out.println(estrutura[i].obterNome());
+                for (Aluno aluno : estrutura[i]) {
+                    System.out.print(i + ": " + aluno.obterMatricula() + " ");
+                    System.out.println(aluno.obterNome());
+                }
             }
         }
     }

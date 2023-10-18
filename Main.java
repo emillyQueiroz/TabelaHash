@@ -26,7 +26,7 @@ public class Main {
         // Remover um aluno
         int removerMatricula = 789;
         tabela.remover(removerMatricula);
-        System.out.println("Aluno com matrícula " + removerMatricula + " removido.");
+        System.out.println("Aluno com matrícula " + removerMatricula + " removido." + alunoEncontrado.obterNome());
 
         tabela.imprimir(); // Mostrar a tabela após a remoção
     }
